@@ -1,4 +1,4 @@
-module BankersDequeProp where
+module Test.BankersDequeProp where
 
 import Hedgehog
 import qualified Hedgehog.Gen as Gen

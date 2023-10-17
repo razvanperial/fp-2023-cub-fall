@@ -1,4 +1,4 @@
-module QueuePureFunctionalProp where
+module Test.QueuePureFunctionalProp where
 
     import Hedgehog
     import qualified Hedgehog.Gen as Gen

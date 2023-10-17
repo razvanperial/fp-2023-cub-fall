@@ -1,4 +1,4 @@
-module SBH_BootstrappedProp where
+module Test.SkewBinomialHeapProp where
 
     import Hedgehog
     import qualified Hedgehog.Gen as Gen
@@ -7,7 +7,7 @@ module SBH_BootstrappedProp where
     import Test.Tasty.Hedgehog
     import qualified Data.Set as Set
 
-    import SBH_Bootstrapped
+    import SkewBinomialHeap
 
     prop_isEmpty :: Property
     prop_isEmpty = property $ do
@@ -19,7 +19,7 @@ module SBH_BootstrappedProp where
     prop_insert_findMin = property $ do
         x <- forAll $ Gen.int (Range.linear 0 100)
         y <- forAll $ Gen.int (Range.linear 0 100)
-        let heap = insert x Empty
+        let heap = insert x []
         let updatedHeap = insert y heap
         findMin updatedHeap === min y (findMin heap)
 

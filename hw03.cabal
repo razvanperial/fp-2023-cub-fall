@@ -68,9 +68,9 @@ executable hw03
 
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.17.0.0, containers, criterion, hspec
-    other-modules:    BankersDeque, Deque, Dijkstra, SBH_Bootstrapped, SkewBinomialHeap, SkewBinomialHeapTests, 
-                      BankersDequeTests, SBH_BootstrappedTests, QueueBankers, QueueRealTime, QueuePureFunctional, 
-                      QueuePhysicist, QueueBankersTests, QueuePhysicistTests, QueuePureFunctionalTests, QueueRealTimeTests
+    other-modules:    BankersDeque, Deque, Dijkstra, SBH_Bootstrapped, SkewBinomialHeap, 
+                      QueueBankers, QueueRealTime, QueuePureFunctional, Queue,
+                      QueuePhysicist, Tree_2_1, Tree_2_2_1, Tree_2_2_2
 
     -- Directories containing source files.
     hs-source-dirs:   app, src, test
@@ -84,8 +84,11 @@ test-suite test
     main-is: Test.hs
 
     other-modules:
-        BankersDequeProp, QueueBankersProp, QueuePhysicistProp, QueuePureFunctionalProp, QueueRealTimeProp, SBH_BootstrappedProp, 
-        SkewBinomialHeapProp
+        Test.BankersDequeProp, Test.QueueBankersProp, Test.QueuePhysicistProp, Test.QueuePureFunctionalProp, 
+        Test.QueueRealTimeProp, Test.SBH_BootstrappedProp, Test.SkewBinomialHeapProp, Test.Tree_2_1Prop, 
+        Test.Tree_2_2_1Prop, Test.Tree_2_2_2Prop, Test.BankersDequeTests, Test.QueueBankersTests, Test.QueuePhysicistTests,
+        Test.QueuePureFunctionalTests, Test.QueueRealTimeTests, Test.SBH_BootstrappedTests, Test.SkewBinomialHeapTests,
+        Test.Tree_2_1Tests, Test.Tree_2_2_1Tests, Test.Tree_2_2_2Tests
 
     hs-source-dirs:
         test, src
@@ -98,6 +101,8 @@ test-suite test
         , tasty
         , tasty-hedgehog
         , tasty-hspec
+        , tasty-hunit
         , containers
+
         
     default-language: Haskell2010

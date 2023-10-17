@@ -1,4 +1,4 @@
-module QueueBankersProp where
+module Test.QueueBankersProp where
 
     import Hedgehog
     import qualified Hedgehog.Gen as Gen

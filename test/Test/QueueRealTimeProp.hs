@@ -1,4 +1,4 @@
-module QueuePhysicistProp where
+module Test.QueueRealTimeProp where
 
     import Hedgehog
     import qualified Hedgehog.Gen as Gen
@@ -7,31 +7,24 @@ module QueuePhysicistProp where
     import Test.Tasty.Hedgehog
 
     import Queue
-    import QueuePhysicist
+    import QueueRealTime
 
     import Prelude hiding (head, tail)
 
-    -- Property tests
-
-    -- Verify that the queue is empty if and only if the list is empty.
     prop_isEmpty :: Property
     prop_isEmpty = property $ do
         xs <- forAll $ Gen.list (Range.linear 0 100) (Gen.int (Range.linear 0 100))
         let queue = fromList xs
         empty queue === null xs
 
-    --  Verify that enqueue correctly adds an element to the head of the queue 
-    -- and that head returns the expected value.
     prop_enqueue :: Property
     prop_enqueue = property $ do
         x <- forAll $ Gen.int (Range.linear 0 100)
         xs <- forAll $ Gen.list (Range.linear 0 100) (Gen.int (Range.linear 0 100))
-        let queue = constructor :: QueuePhysicist Int
-        let updatedQueue = enqueue queue x
-        let updatedQueue2 = foldl enqueue updatedQueue xs
-        head updatedQueue === head updatedQueue2
+        let queue = enqueue ( constructor :: QueueRealTime Int ) x
+        let updatedQueue = foldl enqueue queue xs
+        head updatedQueue === x
         empty updatedQueue === False
-
 
     props :: [TestTree]
     props = [
@@ -39,5 +32,3 @@ module QueuePhysicistProp where
         , testProperty "prop_enqueue" prop_enqueue
       ]
 
-
-    
