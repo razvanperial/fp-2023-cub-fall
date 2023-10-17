@@ -23,6 +23,9 @@ module QueuePhysicist where
     invariant :: QueuePhysicist a -> QueuePhysicist a
     invariant q = checkW $ checkR q
 
+    fromList :: [a] -> QueuePhysicist a
+    fromList xs = PQ [] xs (length xs) [] 0
+
     instance Queue QueuePhysicist where
 
         constructor = PQ [] [] 0 [] 0

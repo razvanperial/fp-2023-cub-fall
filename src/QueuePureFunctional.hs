@@ -12,6 +12,9 @@ module QueuePureFunctional where
         | null frontList  = QPF (reverse rearList) []
         | otherwise       = q
 
+    fromList :: [a] -> QueuePureFunctional a
+    fromList xs = QPF xs []
+
     instance Queue QueuePureFunctional where
 
         constructor = QPF [] []

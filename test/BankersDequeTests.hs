@@ -6,8 +6,13 @@ import Deque
 
 import Prelude hiding (last)
 
+-- Unit tests
+
 spec :: Spec
 spec = do
+
+  -- Unit tests
+
   describe "isEmpty" $ do
     it "returns True for an empty deque" $
       isEmpty (constructor :: BankersDeque Int) `shouldBe` True
@@ -42,3 +47,5 @@ spec = do
 
     it "removes an element from the back of a deque with multiple elements" $
       first (popBack (pushBack (pushBack (constructor :: BankersDeque Int) 1) 2)) `shouldBe` 1
+
+  

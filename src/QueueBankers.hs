@@ -14,6 +14,9 @@ module QueueBankers where
         | frontSize >= rearSize = q
         | otherwise             = BQ (frontList ++ reverse rearList) [] (frontSize + rearSize) 0
 
+    fromList :: [a] -> QueueBankers a
+    fromList xs = BQ xs [] (length xs) 0
+
     instance Queue QueueBankers where
 
         constructor = BQ [] [] 0 0

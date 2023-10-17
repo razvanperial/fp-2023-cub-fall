@@ -21,7 +21,6 @@ module Main where
         QueuePhysicistTests.spec
         QueuePureFunctionalTests.spec
         QueueRealTimeTests.spec
-        -- Dijkstra
 
 
 

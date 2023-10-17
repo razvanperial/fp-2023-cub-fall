@@ -7,7 +7,7 @@ module BankersDeque where
         rear :: [a],
         lenf :: Int,
         lenr :: Int
-    } deriving (Show)
+    } deriving (Show, Eq)
 
     -- c is the constant that determines the maximum ratio between the sizes of the front and rear lists
     c = 2
@@ -25,6 +25,9 @@ module BankersDeque where
                                     f' = front ++ reverse (drop j rear)
                                 in BD f' r' i j
         | otherwise = q
+
+    fromList :: [a] -> BankersDeque a
+    fromList xs = BD xs [] (length xs) 0
 
     instance Deque BankersDeque where
         constructor = BD [] [] 0 0

@@ -18,6 +18,9 @@ module QueueRealTime where
         in RTQ f' [] f'
     invariant (RTQ f r (x:s)) = RTQ f r s
 
+    fromList :: [a] -> QueueRealTime a
+    fromList xs = RTQ xs [] xs
+
 
     instance Queue QueueRealTime where
 
