@@ -34,7 +34,7 @@ prop_isEmpty = property $ do
   let deque = fromList xs
   isEmpty deque === null xs
 
--- test thet the popBack function removes the last element
+-- when a deque has one element, test that it is empty after executing popFront
 prop_popFront :: Property
 prop_popFront = property $ do
   xs <- forAll $ Gen.list (Range.linear 1 100) (Gen.int (Range.linear 0 100))

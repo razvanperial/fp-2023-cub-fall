@@ -84,8 +84,7 @@ test-suite test
     main-is: Test.hs
 
     other-modules:
-        Test.BankersDequeProp, Test.QueueBankersProp, Test.QueuePhysicistProp, Test.QueuePureFunctionalProp, 
-        Test.QueueRealTimeProp, Test.SBH_BootstrappedProp, Test.SkewBinomialHeapProp, Test.Tree_2_1Prop, 
+        Test.QueuePropTest, Test.BankersDequeProp, Test.SBH_BootstrappedProp, Test.SkewBinomialHeapProp, Test.Tree_2_1Prop, 
         Test.Tree_2_2_1Prop, Test.Tree_2_2_2Prop, Test.BankersDequeTests, Test.QueueBankersTests, Test.QueuePhysicistTests,
         Test.QueuePureFunctionalTests, Test.QueueRealTimeTests, Test.SBH_BootstrappedTests, Test.SkewBinomialHeapTests,
         Test.Tree_2_1Tests, Test.Tree_2_2_1Tests, Test.Tree_2_2_2Tests

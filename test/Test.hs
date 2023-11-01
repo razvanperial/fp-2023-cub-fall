@@ -1,9 +1,6 @@
-import Test.Tasty 
+import Test.Tasty
 import Test.BankersDequeProp
-import Test.QueueBankersProp
-import Test.QueuePhysicistProp
-import Test.QueuePureFunctionalProp
-import Test.QueueRealTimeProp
+import Test.QueuePropTest
 import Test.SBH_BootstrappedProp
 import Test.SkewBinomialHeapProp
 import Test.Tree_2_1Prop
@@ -27,10 +24,10 @@ main = do
         [   testGroup "Property tests"
         [
             testGroup "Property testing BankersDeque" Test.BankersDequeProp.props
-            , testGroup "Property testing QueueBankers" Test.QueueBankersProp.props
-            , testGroup "Property testing QueuePhysicist" Test.QueuePhysicistProp.props
-            , testGroup "Property testing QueuePureFunctional" Test.QueuePureFunctionalProp.props
-            , testGroup "Property testing QueueRealTime" Test.QueueRealTimeProp.props
+            , testGroup "Property testing Queue" Test.QueuePropTest.bankers_queue
+            , testGroup "Property testing Queue" Test.QueuePropTest.physicist_queue
+            , testGroup "Property testing Queue" Test.QueuePropTest.real_time_queue
+            , testGroup "Property testing Queue" Test.QueuePropTest.pure_functional_queue
             , testGroup "Property testing SBH_Bootstrapped" Test.SBH_BootstrappedProp.props
             , testGroup "Property testing SkewBinomialHeap" Test.SkewBinomialHeapProp.props
             , testGroup "Property testing Tree_2_1" Test.Tree_2_1Prop.props
