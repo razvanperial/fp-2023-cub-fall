@@ -12,6 +12,7 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import Control.Monad.Combinators.Expr
 
 import Syntax
+import Data.Text.Array (equal)
 
 type Parser = Parsec Void Text
 
@@ -57,6 +58,15 @@ elseKW = kw "Else" <?> "Else"
 boolKW :: Parser Text
 boolKW = kw "Bool" <?> "Bool"
 
+letKW :: Parser Text
+letKW = kw "Let" <?> "Let"
+
+inKW :: Parser Text
+inKW = kw "in" <?> "in"
+
+equals :: Parser Text
+equals = symbol "=" <?> "equals"
+
 lambda :: Parser Text
 lambda = symbol "λ" <|> symbol "\\" <?> "lambda symbol"
 
@@ -99,6 +109,11 @@ pIf :: Parser (Term String)
 pIf =
   If <$> (ifKW *> pLambdaTerm) <*> (thenKW *> pLambdaTerm) <*> (elseKW *> pLambdaTerm)
   <?> "if expression"
+
+pLet :: Parser (Term String)
+pLet =
+  Let <$> (letKW *> ident) <*> (equals *> pLambdaTerm) <*> (inKW *> pLambdaTerm)
+  <?> "let expression"
 
 
 pType :: Parser Type
