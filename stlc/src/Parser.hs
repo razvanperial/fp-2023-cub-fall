@@ -12,7 +12,6 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import Control.Monad.Combinators.Expr
 
 import Syntax
-import Data.Text.Array (equal)
 
 type Parser = Parsec Void Text
 
@@ -85,7 +84,9 @@ pLambdaTerm = choice
   , pAbstraction
   , pApplication
   , pBoolLit
+  , pIntLit
   , pIf
+  , pLet
   ]
   <?> "lambda term"
 
