@@ -58,6 +58,9 @@ elseKW = kw "Else" <?> "Else"
 boolKW :: Parser Text
 boolKW = kw "Bool" <?> "Bool"
 
+intKW :: Parser Text
+intKW = kw "Int" <?> "Int"
+
 letKW :: Parser Text
 letKW = kw "Let" <?> "Let"
 
@@ -105,6 +108,11 @@ pBoolLit =
   BoolLit <$> (true <|> false)
   <?> "boolean literal"
 
+pIntLit :: Parser (Term String)
+pIntLit =
+  IntLit <$> integer
+  <?> "integer literal"
+
 pIf :: Parser (Term String)
 pIf =
   If <$> (ifKW *> pLambdaTerm) <*> (thenKW *> pLambdaTerm) <*> (elseKW *> pLambdaTerm)
@@ -115,6 +123,25 @@ pLet =
   Let <$> (letKW *> ident) <*> (equals *> pLambdaTerm) <*> (inKW *> pLambdaTerm)
   <?> "let expression"
 
+pAdd :: Parser (Term String)
+pAdd =
+  Add <$> parens pLambdaTerm <*> (symbol "+" *> parens pLambdaTerm)
+  <?> "addition expression"
+
+pSub :: Parser (Term String)
+pSub =
+  Sub <$> parens pLambdaTerm <*> (symbol "-" *> parens pLambdaTerm)
+  <?> "subtraction expression"
+
+pMul :: Parser (Term String)
+pMul =
+  Mul <$> parens pLambdaTerm <*> (symbol "*" *> parens pLambdaTerm)
+  <?> "multiplication expression"
+
+pDiv :: Parser (Term String)
+pDiv =
+  Div <$> parens pLambdaTerm <*> (symbol "/" *> parens pLambdaTerm)
+  <?> "division expression"
 
 pType :: Parser Type
 pType =
@@ -124,13 +151,16 @@ pType =
     binary name f = InfixR (f <$ symbol name)
 
 pBaseType :: Parser Type
-pBaseType = pTyVar <|> pBoolType <|> parens pType <?> "base type"
+pBaseType = pTyVar <|> pIntType <|> pBoolType <|> parens pType <?> "base type"
 
 pTyVar :: Parser Type
 pTyVar = TyVar <$> ident <?> "type variable"
 
 pBoolType :: Parser Type
 pBoolType = Bool <$ boolKW <?> "Bool type tag"
+
+pIntType :: Parser Type
+pIntType = Int <$ intKW <?> "Int type tag"
 
 parseEof :: Parser a -> Text -> Either (ParseErrorBundle Text Void) a
 parseEof p = runParser (p <* eof) ""

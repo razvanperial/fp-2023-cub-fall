@@ -55,6 +55,7 @@ executable exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
     , optparse-applicative
     , stlc
     , text
@@ -64,6 +65,7 @@ test-suite stlc-test
   type: exitcode-stdio-1.0
   main-is: Test.hs
   other-modules:
+      Test.Parser
       Test.TypeCheck
       Paths_stlc
   autogen-modules:
@@ -74,6 +76,7 @@ test-suite stlc-test
   build-depends:
       HUnit
     , base >=4.7 && <5
+    , containers
     , stlc
     , tasty
     , tasty-discover
