@@ -2,7 +2,7 @@ module App where
 
 -- optparse-applicative
 import Options.Applicative
-import Parser (parseLambdaTerm)
+import Parser (parseLambdaTerm, ParsingError)
 import TypeCheck
 import Data.Text (Text)
 
@@ -69,10 +69,23 @@ runAction :: Args -> IO ()
 runAction args = do
   action <- transform args
   case transformation action of
-    TypeCheck ->
-      printEither $ typeCheckEmpty <$> parseLambdaTerm (input action)
-    Parse ->
-      printEither $ parseLambdaTerm (input action)
+    TypeCheck -> do
+      let parsed = parseLambdaTerm (input action)
+      case parsed of
+        Left err -> print $ showError err
+        Right term -> do
+          let checked = typeCheckEmpty term
+          case checked of
+            Left err -> print err
+            Right _ -> print "Type check successful"
+    Parse -> do
+      let parsed = parseLambdaTerm (input action)
+      case parsed of
+        Left err -> print $ showError err
+        Right term -> print term
+  where
+    showError :: Parser.ParsingError -> String
+    showError = show
 
 runApp :: IO ()
 runApp = do

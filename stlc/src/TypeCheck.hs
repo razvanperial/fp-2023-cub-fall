@@ -7,14 +7,25 @@ import Control.Applicative ((<|>))
 
 type Env = M.Map String Type
 
-typeCheckEmpty :: Term String -> Either String Type
+-- implement error types to be returned by typeCheck
+data TypeCheckError
+  = UnknownError
+  | VariableNotFound
+  | ApplicationTypeMismatch
+  | BranchesOfIfHaveDifferentTypes
+  | ConditionNotBool
+  deriving Show
+
+
+typeCheckEmpty :: Term String -> Either TypeCheckError Type
 typeCheckEmpty = typeCheck M.empty
 
-typeCheck :: Env -> Term String -> Either String Type
+typeCheck :: Env -> Term String -> Either TypeCheckError Type
 typeCheck env (Var v) =
   case M.lookup v env of
     Just t -> Right t
-    Nothing -> Left ("Variable '" ++ v ++ "' not found in the environment.")
+    -- return error if variable is not found
+    Nothing -> Left VariableNotFound
 typeCheck env (Abs x t b) = do
   let env' = M.insert x t env
   t1 <- typeCheck env' b
@@ -24,7 +35,7 @@ typeCheck env (App m n) = do
   t2 <- typeCheck env n
   case t1 of
     Arrow t11 t12 | t2 == t11 -> Right t12
-    _ -> Left "Application type mismatch."
+    _ -> Left ApplicationTypeMismatch
 typeCheck _ (BoolLit _) =
   Right Bool
 typeCheck env (If c t e) = do
@@ -35,8 +46,8 @@ typeCheck env (If c t e) = do
       et <- typeCheck env e
       if tt == et
         then return tt
-        else Left "Branches of 'if' expression have different types."
-    else Left "Condition in 'if' expression is not of type Bool."
+        else Left BranchesOfIfHaveDifferentTypes
+    else Left ConditionNotBool
 
 typeCheck env (Let x t1 t2) = do
   t1' <- typeCheck env t1

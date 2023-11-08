@@ -13,6 +13,13 @@ import Control.Monad.Combinators.Expr
 
 import Syntax
 
+-- add error type
+data ParsingError
+  = UnknownError
+  | UnexpectedSymbol Char
+  | EmptyInput
+  deriving Show
+
 type Parser = Parsec Void Text
 
 sc :: Parser ()
@@ -170,6 +177,11 @@ mapLeft :: (a -> b) -> Either a c -> Either b c
 mapLeft f (Left x) = Left (f x)
 mapLeft _ (Right x) = Right x
 
-parseLambdaTerm :: Text -> Either String (Term String)
-parseLambdaTerm input =
-  mapLeft errorBundlePretty $ parseEof pLambdaTerm input
+parseLambdaTerm :: Text -> Either ParsingError (Term String)
+parseLambdaTerm = mapLeft translateError . parseEof pLambdaTerm
+  where
+    translateError :: ParseErrorBundle Text Void -> ParsingError
+    translateError bundle =
+      case errorBundlePretty bundle of
+        [] -> EmptyInput
+        (x:_) -> UnexpectedSymbol x
