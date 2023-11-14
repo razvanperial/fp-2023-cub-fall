@@ -2,8 +2,10 @@ module TypeCheck where
 
 import Syntax
 import qualified Data.Map as M
-import Control.Monad (guard)
+import Control.Monad (guard, unless)
 import Control.Applicative ((<|>))
+import Data.Either (isRight)
+import Control.Applicative (Alternative(..))
 
 type Env = M.Map String Type
 
@@ -14,7 +16,7 @@ data TypeCheckError
   | ApplicationTypeMismatch
   | BranchesOfIfHaveDifferentTypes
   | ConditionNotBool
-  deriving Show
+  deriving (Show, Eq)
 
 
 typeCheckEmpty :: Term String -> Either TypeCheckError Type
@@ -53,3 +55,24 @@ typeCheck env (Let x t1 t2) = do
   t1' <- typeCheck env t1
   let env' = M.insert x t1' env
   typeCheck env' t2
+
+typeCheck env (Add m n) = do
+  t1 <- typeCheck env m
+  t2 <- typeCheck env n
+  unless (t1 == Int && t2 == Int) (Left ApplicationTypeMismatch)
+  return Int
+typeCheck env (Sub m n) = do
+  t1 <- typeCheck env m
+  t2 <- typeCheck env n
+  unless (t1 == Int && t2 == Int) (Left ApplicationTypeMismatch)
+  return Int
+typeCheck env (Mul m n) = do
+  t1 <- typeCheck env m
+  t2 <- typeCheck env n
+  unless (t1 == Int && t2 == Int) (Left ApplicationTypeMismatch)
+  return Int
+typeCheck env (Div m n) = do
+  t1 <- typeCheck env m
+  t2 <- typeCheck env n
+  unless (t1 == Int && t2 == Int) (Left ApplicationTypeMismatch)
+  return Int

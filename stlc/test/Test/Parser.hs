@@ -19,14 +19,14 @@ unit_VarTests = do
 unit_IfTests = do
     ifTests
 
+unit_LetTests = do
+    letTests
+
 unit_AbstractionTests = do
     abstractionTests
 
 unit_ApplicationTests = do
     applicationTests
-
-
-
 
 intLitteralTests = do
     parseLambdaTerm "42" @?= Right (IntLit 42)
@@ -44,6 +44,12 @@ varTests = do
 ifTests = do
     parseLambdaTerm "If True Then False Else True" @?= Right (If (BoolLit True) (BoolLit False) (BoolLit True))
     parseLambdaTerm "If True Then If False Then True Else False Else False" @?= Right (If (BoolLit True) (If (BoolLit False) (BoolLit True) (BoolLit False)) (BoolLit False))
+
+letTests = do
+    parseLambdaTerm "Let a = 1 In a" @?= Right (Let "a" (IntLit 1) (Var "a"))
+    parseLambdaTerm "Let a = 1 In Let b = 2 In a" @?= Right (Let "a" (IntLit 1) (Let "b" (IntLit 2) (Var "a")))
+    -- should fail on erroneous inputs
+    parseLambdaTerm "Let in = 1 in in" @?= Left (UnexpectedSymbol '1')
 
 abstractionTests = do
     parseLambdaTerm "\\x:Bool. x" @?= Right (Abs "x" Bool (Var "x"))

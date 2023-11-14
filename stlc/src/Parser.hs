@@ -18,7 +18,7 @@ data ParsingError
   = UnknownError
   | UnexpectedSymbol Char
   | EmptyInput
-  deriving Show
+  deriving (Show,Eq)
 
 type Parser = Parsec Void Text
 
@@ -71,7 +71,7 @@ letKW :: Parser Text
 letKW = kw "Let" <?> "Let"
 
 inKW :: Parser Text
-inKW = kw "in" <?> "in"
+inKW = kw "In" <?> "In"
 
 equals :: Parser Text
 equals = symbol "=" <?> "equals"
@@ -94,6 +94,10 @@ pLambdaTerm = choice
   , pIntLit
   , pIf
   , pLet
+  , pAdd
+  , pSub
+  , pMul
+  , pDiv
   ]
   <?> "lambda term"
 

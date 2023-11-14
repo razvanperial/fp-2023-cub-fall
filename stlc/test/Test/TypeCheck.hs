@@ -6,7 +6,7 @@ import Syntax
 import TypeCheck
 import qualified Data.Map as M
 
-check :: Term String -> Either String Type -> Assertion
+check :: Term String -> Either TypeCheckError Type -> Assertion
 check term expectedType =
   typeCheckEmpty term @?= expectedType
 
