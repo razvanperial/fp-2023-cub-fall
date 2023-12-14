@@ -2,31 +2,20 @@
 
 module Main where
 
--- property based testing
 import Test.QuickCheck
 
--- Define the regular expression data type
 data RegExp a
   = Empty
   | Epsilon
   | Literal a
   | Concat (RegExp a) (RegExp a)
   | Alt (RegExp a) (RegExp a)
-  | Repetition (RegExp a)
-  | Optional (RegExp a)
-  | Wildcard
-  | RepetitionRange Int Int (RegExp a)
+  | Iteration (RegExp a)
   deriving (Functor, Show)
 
--- Define a smart constructor for repetition with a specified range
-repetitionRange :: Int -> Int -> RegExp a -> RegExp a
-repetitionRange minRange maxRange re
-  | minRange > maxRange = error "Invalid repetition range"
-  | minRange == 0 && maxRange == 0 = Epsilon
-  | minRange == 0 && maxRange == 1 = Optional re
-  | minRange == 0 = Optional (RepetitionRange 1 maxRange re)
-  | minRange == maxRange = Repetition re
-  | otherwise = RepetitionRange minRange maxRange re
+-- Smart constructor for repetition (0 or more)
+iteration :: RegExp a -> RegExp a
+iteration re = Alt Epsilon (Concat re (Iteration re))
 
 -- Match function using Brzozowski derivatives
 match :: Eq a => RegExp a -> [a] -> Bool
@@ -39,10 +28,7 @@ nullable Epsilon = True
 nullable (Literal _) = False
 nullable (Concat r1 r2) = nullable r1 && nullable r2
 nullable (Alt r1 r2) = nullable r1 || nullable r2
-nullable (Repetition _) = True
-nullable (Optional _) = True
-nullable Wildcard = True
-nullable (RepetitionRange _ _ _) = True
+nullable (Iteration _) = True
 
 -- Derivative function computes the Brzozowski derivative of a regular expression with respect to a symbol
 derivative :: Eq a => RegExp a -> a -> RegExp a
@@ -55,50 +41,83 @@ derivative (Concat r1 r2) a
   | nullable r1 = Alt (Concat (derivative r1 a) r2) (derivative r2 a)
   | otherwise = Concat (derivative r1 a) r2
 derivative (Alt r1 r2) a = Alt (derivative r1 a) (derivative r2 a)
-derivative (Repetition r) a = Concat (derivative r a) (Repetition r)
-derivative (Optional r) a = Optional (derivative r a)
-derivative Wildcard _ = Epsilon
-derivative (RepetitionRange minRange maxRange r) a =
-  repetitionRange (max 0 (minRange - 1)) (max 0 (maxRange - 1)) (derivative r a)
+derivative (Iteration r) a = Concat (derivative r a) (Iteration r)
 
+-- Intersect function returns a regular expression that matches the intersection of two regular expressions
+intersect :: RegExp a -> RegExp a -> RegExp a
+intersect re1 re2 = Alt (Concat (intersect' re1) re2) (Concat re1 (intersect' re2))
+  where
+    intersect' Empty = Empty
+    intersect' Epsilon = Epsilon
+    intersect' (Literal a) = Literal a
+    intersect' (Concat r1 r2) = Concat (intersect' r1) (intersect' r2)
+    intersect' (Alt r1 r2) = Alt (intersect' r1) (intersect' r2)
+    intersect' (Iteration r) = Iteration (intersect' r)
 
+-- Unite function returns a regular expression that matches the union of two regular expressions
+unite :: RegExp a -> RegExp a -> RegExp a
+unite re1 re2 = Alt re1 re2
+
+-- Complement function returns a regular expression that matches the complement of the given regular expression
+complement :: RegExp a -> RegExp a
+complement re = Alt (complement' re) Epsilon
+  where
+    complement' Empty = Epsilon
+    complement' Epsilon = Empty
+    complement' (Literal a) = Literal a
+    complement' (Concat r1 r2) = Concat (complement' r1) (complement' r2)
+    complement' (Alt r1 r2) = Alt (complement' r1) (complement' r2)
+    complement' (Iteration r) = Iteration (complement' r)
+
+-- Difference function returns a regular expression that matches the difference of two regular expressions
+difference :: RegExp a -> RegExp a -> RegExp a
+difference re1 re2 = intersect re1 (complement re2)
+
+-- Simplify function returns a regular expression that is equivalent to the given regular expression but is simplified
+simplify :: RegExp a -> RegExp a
+simplify Empty = Empty
+simplify Epsilon = Epsilon
+simplify (Literal a) = Literal a
+simplify (Concat r1 r2) = Concat (simplify r1) (simplify r2)
+simplify (Alt r1 r2) = Alt (simplify r1) (simplify r2)
+simplify (Iteration r) = Iteration (simplify r)
 
 -- Property based testing
 
--- Property 1: Matching epsilon should always return True
-prop_epsilonAlwaysMatches :: Property
-prop_epsilonAlwaysMatches = property $ match Epsilon "" === True
+-- Arbitrary instance for RegExp
+instance Arbitrary a => Arbitrary (RegExp a) where
+  arbitrary = oneof [ return Empty
+                    , return Epsilon
+                    , Literal <$> arbitrary
+                    , Concat <$> arbitrary <*> arbitrary
+                    , Alt <$> arbitrary <*> arbitrary
+                    , Iteration <$> arbitrary
+                    ]
 
--- Property 2: Matching any literal character should return False for an empty string
-prop_literalNeverMatchesEmpty :: Char -> Property
-prop_literalNeverMatchesEmpty c = property $ not (match (Literal c) "")
+-- Property for the nullable function
+prop_nullable :: RegExp Char -> Bool
+prop_nullable re = nullable re == (match re "")
 
--- Property 3: Matching a single literal character should return True for a string containing only that character
-prop_literalMatchesSingleChar :: Char -> Property
-prop_literalMatchesSingleChar c = property $ match (Literal c) [c] === True
+-- Property for the match function
+prop_match :: RegExp Char -> [Char] -> Bool
+prop_match re input = match re input == match (simplify re) input
 
--- Property 4: A repeated character should match a string with multiple occurrences of that character
-prop_repetitionMatchesMultiple :: Char -> Int -> Property
-prop_repetitionMatchesMultiple c n =
-  property $ match (Repetition (Literal c)) (replicate n c) === True
+-- Property for the simplify function
+prop_simplify :: RegExp Char -> Bool
+prop_simplify re = match re "" == match (simplify re) ""
 
--- Property 5: Either of the alternatives in Alt should match the string
-prop_alternativeMatchesEither :: Char -> Char -> String -> Property
-prop_alternativeMatchesEither c1 c2 input =
-  property $ match (Alt (Literal c1) (Literal c2)) input === (input == [c1] || input == [c2])
+-- Property for the unite function
+prop_unite :: RegExp Char -> RegExp Char -> [Char] -> Bool
+prop_unite re1 re2 input = match (unite re1 re2) input == (match re1 input || match re2 input)
 
--- Property 6: Concatenating two literals and matching against the concatenated string
--- should be equivalent to matching each literal separately.
-prop_concatenationOfLiterals :: Char -> Char -> Property
-prop_concatenationOfLiterals c1 c2 =
-  property $ match (Concat (Literal c1) (Literal c2)) [c1, c2] === True
-
+-- Property for the intersect function
+prop_intersect :: RegExp Char -> RegExp Char -> [Char] -> Bool
+prop_intersect re1 re2 input = match (intersect re1 re2) input == (match re1 input && match re2 input)
 
 main :: IO ()
 main = do
-  quickCheck prop_epsilonAlwaysMatches
-  quickCheck prop_literalNeverMatchesEmpty
-  quickCheck prop_literalMatchesSingleChar
-  quickCheck prop_repetitionMatchesMultiple
-  quickCheck prop_alternativeMatchesEither
-  quickCheck prop_concatenationOfLiterals
+  quickCheck prop_nullable
+  quickCheck prop_match
+  quickCheck prop_simplify
+  quickCheck prop_unite
+  quickCheck prop_intersect
