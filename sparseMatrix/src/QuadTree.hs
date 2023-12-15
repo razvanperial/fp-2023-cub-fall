@@ -38,10 +38,23 @@ data BreadKrumb = NW | NE | SW | SE
   deriving (Show, Eq)
 
 getTrail :: Int -> Point -> [BreadKrumb]
-getTrail = undefined 
+getTrail bound (Point x y) =
+  let halfsize = 2^(bound-1) in
+    case (x < halfsize, y < halfsize) of
+      (True, True) -> NW : getTrail (bound-1) (Point x y)
+      (True, False) -> SW : getTrail (bound-1) (Point x (y - halfsize))
+      (False, True) -> NE : getTrail (bound-1) (Point (x - halfsize) y)
+      (False, False) -> SE : getTrail (bound-1) (Point (x - halfsize) (y - halfsize))
 
 insert :: Eq a => SquareQuadTree a -> Point -> a -> SquareQuadTree a
-insert = undefined
+insert (Cell size oldVal) _ newVal = Cell size (if oldVal == newVal then oldVal else newVal)
+insert (Quad size nw ne sw se) point val =
+  case getTrail size point of
+    []      -> Quad size nw ne sw se
+    NW:trail -> Quad size (insert nw point val) ne sw se
+    NE:trail -> Quad size nw (insert ne point val) sw se
+    SW:trail -> Quad size nw ne (insert sw point val) se
+    SE:trail -> Quad size nw ne sw (insert se point val)
 
 instance Show a => Show (SquareQuadTree a) where
   show quadTree =

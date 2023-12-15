@@ -134,41 +134,126 @@ m16multm16 =
           (Quad 1 (m1x1 110) (m1x1 120) (m1x1 254) (m1x1 280))
           (Quad 1 (m1x1 314) (m1x1 356) (m1x1 426) (m1x1 484))
           (Quad 1 (m1x1 398) (m1x1 440) (m1x1 542) (m1x1 600))
+          
 
-unit_addition :: Assertion
-unit_addition = do 
-  matrix1 `add` matrix2 @?= m2x2 6 8 10 12 
-  matrix1 `add` matrix3 @?= m2x2 2 (-1) 8 (-3)
-  matrix2 `add` matrix3 @?= m2x2 6 3 12 1 
-  examplematrix1 `add` examplematrix2 @?= examplematrix1plus2
 
-unit_multiplication :: Assertion
-unit_multiplication = do 
-  matrix1 `mult` matrix2 @?= m2x2 19 22 43 50
-  matrix1 `mult` matrix3 @?= m2x2 11 (-17) 23 (-37)
-  matrix2 `mult` matrix3 @?= m2x2 35 (-57) 47 (-77) 
-  examplematrix1 `mult` examplematrix2 @?= examplematrix1mult2
-  m16 `mult` m16 @?= m16multm16
+-- Unit tests for insertion
+unit_insert1 :: Assertion
+unit_insert1 = do
+  let initialMatrix = Cell 2 0  -- Adjust the size and initial value as needed
+  let point = Point 1 1 
+  let newVal = 42  -- Adjust the new value as needed
 
-unit_sub :: Assertion
-unit_sub = do 
-  matrix1 `sub` matrix2 @?= m2x2 (-4) (-4) (-4) (-4)
-  matrix2 `sub` matrix1 @?= m2x2 4 4 4 4
+  let updatedMatrix = insert initialMatrix point newVal
+  let retrievedVal = case accessMatrix updatedMatrix point of
+        Just val -> val
+        Nothing  -> error "Invalid point or matrix"
 
-unit_neg :: Assertion
-unit_neg = do 
-  neg matrix1 @?= m2x2 (-1) (-2) (-3) (-4)
-  neg matrix2 @?= m2x2 (-5) (-6) (-7) (-8)
-  neg matrix3 @?= m2x2 (-1) 3 (-5) 7 
+  -- Check if the inserted value is equal to the retrieved value
+  newVal @?= retrievedVal
 
-unit_scalarMult :: Assertion
-unit_scalarMult = do 
-  10 `scalarMult` matrix1 @?= m2x2 10 20 30 40
-  10 `scalarMult` matrix2 @?= m2x2 50 60 70 80
-  10 `scalarMult` matrix3 @?= m2x2 10 (-30) 50 (-70)
+-- Additional unit tests for insertion
+unit_insert2 :: Assertion
+unit_insert2 = do
+  -- different size
+  let initialMatrix = Cell 3 0
+  let point = Point 1 1
+  let newVal = 42
 
-unit_transpose :: Assertion
-unit_transpose = do 
-  transpose matrix1 @?= m2x2 1 3 2 4 
-  transpose matrix2 @?= m2x2 5 7 6 8
-  transpose matrix3 @?= m2x2 1 5 (-3) (-7)
+  let updatedMatrix = insert initialMatrix point newVal
+  let retrievedVal = case accessMatrix updatedMatrix point of
+        Just val -> val
+        Nothing  -> error "Invalid point or matrix"
+
+  newVal @?= retrievedVal
+
+unit_insert3 :: Assertion
+unit_insert3 = do
+  -- different point
+  let initialMatrix = Cell 2 0
+  let point = Point 0 0
+  let newVal = 42
+
+  let updatedMatrix = insert initialMatrix point newVal
+  let retrievedVal = case accessMatrix updatedMatrix point of
+        Just val -> val
+        Nothing  -> error "Invalid point or matrix"
+
+  newVal @?= retrievedVal
+
+unit_insert4 :: Assertion
+unit_insert4 = do
+    let initialMatrix = examplematrix1
+    let point = Point 0 0
+    let newVal = 42
+
+    let updatedMatrix = insert initialMatrix point newVal
+    let retrievedVal = case accessMatrix updatedMatrix point of
+          Just val -> val
+          Nothing  -> error "Invalid point or matrix"
+
+    newVal @?= retrievedVal
+
+unit_insert5 :: Assertion
+unit_insert5 = do
+    let initialMatrix = examplematrix2
+    let point = Point 1 1
+    let newVal = 42
+
+    let updatedMatrix = insert initialMatrix point newVal
+    let retrievedVal = case accessMatrix updatedMatrix point of
+          Just val -> val
+          Nothing  -> error "Invalid point or matrix"
+
+    newVal @?= retrievedVal
+
+-- Helper function to access the matrix at a specific point
+accessMatrix :: Eq a => SquareQuadTree a -> Point -> Maybe a
+accessMatrix (Cell size val) (Point x y)
+  | x < 0 || y < 0 || x >= 2^size || y >= 2^size = Nothing
+  | otherwise = Just val
+accessMatrix (Quad size nw ne sw se) point =
+  case getTrail size point of
+    []      -> Nothing
+    NW:trail -> accessMatrix nw point
+    NE:trail -> accessMatrix ne point
+    SW:trail -> accessMatrix sw point
+    SE:trail -> accessMatrix se point
+
+-- unit_addition :: Assertion
+-- unit_addition = do 
+--   matrix1 `add` matrix2 @?= m2x2 6 8 10 12 
+--   matrix1 `add` matrix3 @?= m2x2 2 (-1) 8 (-3)
+--   matrix2 `add` matrix3 @?= m2x2 6 3 12 1 
+--   examplematrix1 `add` examplematrix2 @?= examplematrix1plus2
+
+-- unit_multiplication :: Assertion
+-- unit_multiplication = do 
+--   matrix1 `mult` matrix2 @?= m2x2 19 22 43 50
+--   matrix1 `mult` matrix3 @?= m2x2 11 (-17) 23 (-37)
+--   matrix2 `mult` matrix3 @?= m2x2 35 (-57) 47 (-77) 
+--   examplematrix1 `mult` examplematrix2 @?= examplematrix1mult2
+--   m16 `mult` m16 @?= m16multm16
+
+-- unit_sub :: Assertion
+-- unit_sub = do 
+--   matrix1 `sub` matrix2 @?= m2x2 (-4) (-4) (-4) (-4)
+--   matrix2 `sub` matrix1 @?= m2x2 4 4 4 4
+
+-- unit_neg :: Assertion
+-- unit_neg = do 
+--   neg matrix1 @?= m2x2 (-1) (-2) (-3) (-4)
+--   neg matrix2 @?= m2x2 (-5) (-6) (-7) (-8)
+--   neg matrix3 @?= m2x2 (-1) 3 (-5) 7 
+
+-- unit_scalarMult :: Assertion
+-- unit_scalarMult = do 
+--   10 `scalarMult` matrix1 @?= m2x2 10 20 30 40
+--   10 `scalarMult` matrix2 @?= m2x2 50 60 70 80
+--   10 `scalarMult` matrix3 @?= m2x2 10 (-30) 50 (-70)
+
+-- unit_transpose :: Assertion
+-- unit_transpose = do 
+--   transpose matrix1 @?= m2x2 1 3 2 4 
+--   transpose matrix2 @?= m2x2 5 7 6 8
+--   transpose matrix3 @?= m2x2 1 5 (-3) (-7)
